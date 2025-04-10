@@ -9,23 +9,21 @@
       background: #f3f3f3;
       padding: 20px;
     }
-    h1, h2 {
-      color: #2c3e50;
-    }
-    a {
-      color: #2980b9;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
     .folder {
       margin-left: 20px;
       border-left: 2px solid #ccc;
       padding-left: 10px;
     }
-    .subpastas {
-      margin-left: 20px;
+    h2, h3 {
+      color: #2c3e50;
+    }
+    a {
+      color: #2980b9;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -34,55 +32,40 @@
   <div id="conteudo">Carregando arquivos...</div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
+    const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
 
-    function carregarPasta(id, container) {
-      fetch(`${API_URL}?id=${id}`)
+    function criarHTML(pasta) {
+      let html = `<div class="folder"><h3>${pasta.nome}</h3><ul>`;
+      if (pasta.arquivos) {
+        for (const arquivo of pasta.arquivos) {
+          html += `<li><a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a></li>`;
+        }
+      }
+      html += `</ul>`;
+      if (pasta.subpastas) {
+        for (const subpasta of pasta.subpastas) {
+          html += `<div class="subpasta"><a onclick="carregarPasta('${subpasta.id}')">📁 ${subpasta.nome}</a></div>`;
+        }
+      }
+      html += `</div>`;
+      return html;
+    }
+
+    function carregarPasta(id = "") {
+      document.getElementById("conteudo").innerHTML = "Carregando arquivos...";
+      fetch(`${URL}?id=${id}`)
         .then(res => res.json())
         .then(data => {
-          const div = document.createElement('div');
-          div.className = 'folder';
-          div.innerHTML = `<h2>📁 ${data.nome}</h2>`;
-
-          if (data.arquivos.length > 0) {
-            const lista = document.createElement('ul');
-            for (const arquivo of data.arquivos) {
-              const item = document.createElement('li');
-              item.innerHTML = `<a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a>`;
-              lista.appendChild(item);
-            }
-            div.appendChild(lista);
-          }
-
-          if (data.subpastas.length > 0) {
-            const subDiv = document.createElement('div');
-            subDiv.className = 'subpastas';
-            for (const sub of data.subpastas) {
-              const subItem = document.createElement('div');
-              subItem.innerHTML = `<span style="cursor:pointer;">📁 ${sub.nome}</span>`;
-              subItem.addEventListener('click', () => {
-                // Evita carregar duas vezes
-                if (!subItem.dataset.carregado) {
-                  subItem.dataset.carregado = "true";
-                  carregarPasta(sub.id, subItem);
-                }
-              });
-              subDiv.appendChild(subItem);
-            }
-            div.appendChild(subDiv);
-          }
-
-          container.innerHTML = '';
-          container.appendChild(div);
+          document.getElementById("conteudo").innerHTML = criarHTML(data);
         })
         .catch(err => {
-          container.innerHTML = "Erro ao carregar os arquivos 😢";
+          document.getElementById("conteudo").innerHTML = "Erro ao carregar os arquivos 😢";
           console.error(err);
         });
     }
 
-    // Carrega pasta raiz ao iniciar
-    carregarPasta('', document.getElementById("conteudo"));
+    // Carrega a pasta raiz na primeira vez
+    carregarPasta();
   </script>
 </body>
 </html>
