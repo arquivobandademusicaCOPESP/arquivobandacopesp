@@ -5,104 +5,89 @@
   <title>Arquivo da banda de música do Comando de Operações Especiais</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-image: url('camuflagem.jpg');
-      background-size: cover;
-      background-attachment: fixed;
-      color: white;
-      padding: 20px;
       margin: 0;
+      font-family: Arial, sans-serif;
+      background-image: url('https://www.publicdomainpictures.net/pictures/270000/velka/camouflage-pattern.jpg');
+      background-size: cover;
+      color: #fff;
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-top: 20px;
       font-size: 28px;
       text-shadow: 2px 2px 4px #000;
     }
 
     #pesquisa {
       display: block;
-      margin: 0 auto 20px;
+      margin: 20px auto;
       padding: 10px;
-      width: 80%;
-      max-width: 400px;
-      font-size: 16px;
+      width: 300px;
       border-radius: 5px;
       border: none;
+      font-size: 16px;
     }
 
-    .folder {
-      display: inline-block;
-      margin: 15px;
+    #carregando {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 60px;
+      font-size: 18px;
+    }
+
+    #carregando img {
+      width: 80px;
+      height: 80px;
+    }
+
+    #conteudo {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .pasta {
       text-align: center;
+      margin: 15px;
       cursor: pointer;
     }
 
-    .folder img {
-      width: 96px;
-      height: 96px;
-    }
-
-    .folder-name {
-      margin-top: 8px;
-      font-size: 14px;
-      word-break: break-word;
-      max-width: 100px;
-    }
-
-    .file-list {
-      margin-left: 30px;
-      margin-bottom: 15px;
-    }
-
-    .file-list a {
+    .pasta img {
+      width: 80px;
+      height: 80px;
       display: block;
-      color: white;
-      text-decoration: none;
-      margin: 4px 0;
+      margin: 0 auto 5px;
     }
 
-    .file-list a:hover {
-      text-decoration: underline;
-    }
-
-    #loading {
-      text-align: center;
-      font-size: 18px;
+    .arquivo {
       display: none;
     }
 
-    #loading img {
-      width: 48px;
-      height: 48px;
-    }
-
-    .creditos {
+    #responsaveis {
       position: fixed;
       bottom: 20px;
       right: 20px;
       text-align: right;
-      font-size: 13px;
-      color: #ddd;
-      text-shadow: 1px 1px 2px black;
-      line-height: 1.5;
+      font-size: 14px;
+      text-shadow: 1px 1px 3px #000;
     }
   </style>
 </head>
 <body>
   <h1>Arquivo da banda de música do Comando de Operações Especiais</h1>
-
-  <input type="text" id="pesquisa" placeholder="Pesquisar arquivos (mín. 3 letras)">
-
-  <div id="loading">
+  <input type="text" id="pesquisa" placeholder="Pesquisar arquivos..." oninput="pesquisarArquivos()">
+  
+  <div id="carregando">
     <img src="https://i.imgur.com/llF5iyg.gif" alt="Carregando...">
-    <div>carregando... aguarde!</div>
+    <div>Carregando... aguarde!</div>
   </div>
 
   <div id="conteudo"></div>
 
-  <div class="creditos">
+  <div id="responsaveis">
     Responsáveis:<br>
     2º SGT Cesar Augusto.<br>
     SD Procópio.<br>
@@ -111,112 +96,61 @@
 
   <script>
     const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
-    const pastaRaiz = "1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U";
 
-    const conteudo = document.getElementById("conteudo");
-    const loading = document.getElementById("loading");
-
-    function mostrarCarregando(mostrar) {
-      loading.style.display = mostrar ? "block" : "none";
-    }
-
-    function criarElementoPasta(pasta) {
-      const div = document.createElement("div");
-      div.className = "folder";
-      div.innerHTML = `
-        <img src="https://i.imgur.com/SQ0aYfR.png" alt="Pasta">
-        <div class="folder-name">${pasta.nome}</div>
+    function criarPastaHTML(pasta) {
+      return `
+        <div class="pasta" onclick="abrirPasta('${pasta.id}', this)">
+          <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png" alt="Pasta">
+          <div>${pasta.nome}</div>
+        </div>
       `;
-      div.onclick = () => carregarConteudo(pasta.id, div);
-      return div;
     }
 
-    function criarListaArquivos(arquivos) {
-      const lista = document.createElement("div");
-      lista.className = "file-list";
-      arquivos.forEach(arquivo => {
-        const link = document.createElement("a");
-        link.href = arquivo.url;
-        link.target = "_blank";
-        link.textContent = `📄 ${arquivo.nome}`;
-        lista.appendChild(link);
-      });
-      return lista;
+    function criarArquivosHTML(arquivos) {
+      return arquivos.map(arq => `
+        <div class="arquivo" data-nome="${arq.nome.toLowerCase()}">
+          📄 <a href="${arq.url}" target="_blank">${arq.nome}</a>
+        </div>
+      `).join('');
     }
 
-    function carregarConteudo(id, container) {
-      mostrarCarregando(true);
+    function abrirPasta(id, el) {
       fetch(`${URL}?id=${id}`)
         .then(res => res.json())
         .then(data => {
-          mostrarCarregando(false);
-          if (data.arquivos && data.arquivos.length > 0) {
-            const lista = criarListaArquivos(data.arquivos);
-            container.appendChild(lista);
-          }
-          if (data.subpastas && data.subpastas.length > 0) {
-            data.subpastas.forEach(pasta => {
-              const el = criarElementoPasta(pasta);
-              container.appendChild(el);
-            });
-          }
-        })
-        .catch(err => {
-          mostrarCarregando(false);
-          alert("Erro ao carregar os dados");
-          console.error(err);
+          const div = document.createElement('div');
+          div.innerHTML = criarArquivosHTML(data.arquivos);
+          el.appendChild(div);
         });
     }
 
-    document.getElementById("pesquisa").addEventListener("input", e => {
-      const termo = e.target.value.trim().toLowerCase();
-      if (termo.length >= 3) {
-        mostrarCarregando(true);
-        fetch(`${URL}?id=${pastaRaiz}`)
-          .then(res => res.json())
-          .then(data => {
-            mostrarCarregando(false);
-            conteudo.innerHTML = "";
-            const resultados = [];
-
-            function buscarArquivos(pasta) {
-              if (pasta.arquivos) {
-                resultados.push(...pasta.arquivos.filter(a => a.nome.toLowerCase().includes(termo)));
-              }
-              if (pasta.subpastas) {
-                pasta.subpastas.forEach(buscarArquivos);
-              }
-            }
-
-            buscarArquivos(data);
-
-            if (resultados.length === 0) {
-              conteudo.innerHTML = "<p>Nenhum arquivo encontrado.</p>";
-              return;
-            }
-
-            const lista = criarListaArquivos(resultados);
-            conteudo.appendChild(lista);
-          });
-      }
-    });
-
-    // Carregamento inicial
-    window.onload = () => {
-      mostrarCarregando(true);
-      fetch(`${URL}?id=${pastaRaiz}`)
+    function carregarRaiz() {
+      fetch(`${URL}?id=1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U`)
         .then(res => res.json())
         .then(data => {
-          mostrarCarregando(false);
-          if (data.subpastas) {
-            data.subpastas.forEach(pasta => {
-              const el = criarElementoPasta(pasta);
-              conteudo.appendChild(el);
-            });
-          }
+          document.getElementById("carregando").style.display = "none";
+          const conteudo = document.getElementById("conteudo");
+          data.subpastas.forEach(pasta => {
+            conteudo.innerHTML += criarPastaHTML(pasta);
+          });
         });
-    };
+    }
+
+    function pesquisarArquivos() {
+      const termo = document.getElementById("pesquisa").value.toLowerCase();
+      const arquivos = document.querySelectorAll(".arquivo");
+      arquivos.forEach(arq => {
+        if (termo.length >= 3 && arq.dataset.nome.includes(termo)) {
+          arq.style.display = "block";
+        } else {
+          arq.style.display = "none";
+        }
+      });
+    }
+
+    window.onload = carregarRaiz;
   </script>
 </body>
 </html>
+
 
