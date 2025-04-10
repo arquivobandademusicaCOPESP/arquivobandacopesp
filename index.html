@@ -1,43 +1,64 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Arquivos da Banda</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f9f9f9;
     }
+
     .folder {
       margin-left: 20px;
+      border-left: 2px solid #ccc;
+      padding-left: 10px;
+      margin-bottom: 10px;
     }
-    a {
-      text-decoration: none;
+
+    h2, h3 {
       color: #2c3e50;
     }
+
+    a {
+      text-decoration: none;
+      color: #0077cc;
+    }
+
     a:hover {
       text-decoration: underline;
+    }
+
+    ul {
+      list-style-type: none;
+      padding-left: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>🎼 Arquivos da Banda</h1>
-  <div id="conteudo">Carregando arquivos...</div>
+  <h2>🎵 Arquivos da Banda 🎶</h2>
+  <div id="conteudo">Carregando...</div>
 
   <script>
     const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
 
     function criarHTML(pasta) {
-      let html = `<div class="folder" data-id="${pasta.id}"><h3>📁 <a href="#" onclick="carregarPasta('${pasta.id}', this); return false;">${pasta.nome}</a></h3><ul>`;
-      
-      if (pasta.arquivos) {
-        for (const arquivo of pasta.arquivos) {
-          html += `<li><a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a></li>`;
+      let html = `<div class="folder" data-id="${pasta.id}"><h3>📁 ${pasta.nome}</h3><ul>`;
+
+      // Subpastas
+      if (pasta.subpastas && pasta.subpastas.length > 0) {
+        for (const sub of pasta.subpastas) {
+          html += `<li>📁 <a href="#" onclick="carregarPasta('${sub.id}', this); return false;">${sub.nome}</a></li>`;
         }
       }
-      
+
+      // Arquivos
+      if (pasta.arquivos && pasta.arquivos.length > 0) {
+        for (const arquivo of pasta.arquivos) {
+          html += `<li>📄 <a href="${arquivo.url}" target="_blank">${arquivo.nome}</a></li>`;
+        }
+      }
+
       html += `</ul></div>`;
       return html;
     }
@@ -50,8 +71,12 @@
         .then(data => {
           const html = criarHTML(data);
           if (link) {
-            destino.innerHTML += html;
+            // Adiciona subpasta dentro da pasta clicada
+            const novaDiv = document.createElement("div");
+            novaDiv.innerHTML = html;
+            destino.appendChild(novaDiv);
           } else {
+            // Primeira vez, substitui tudo
             destino.innerHTML = html;
           }
         })
@@ -61,6 +86,7 @@
         });
     }
 
+    // Carrega a pasta raiz ao iniciar
     window.onload = () => carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U");
   </script>
 </body>
