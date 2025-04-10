@@ -5,123 +5,73 @@
   <title>Arquivo da banda de música do Comando de Operações Especiais</title>
   <style>
     body {
+      background-color: #2e2e2e;
+      color: #e0e0e0;
       font-family: Arial, sans-serif;
-      background: #2e2e2e url('https://www.transparenttextures.com/patterns/camouflage.png');
-      color: #f0f0f0;
       padding: 20px;
     }
 
     h1 {
       text-align: center;
-      color: #9acd32;
+      font-size: 28px;
+      margin-bottom: 30px;
+      color: #c0ffb3;
     }
 
-    #busca {
-      display: block;
-      margin: 20px auto;
+    .folder {
+      background-color: #3a3a3a;
+      margin: 10px 0;
       padding: 10px;
-      width: 80%;
-      font-size: 16px;
-    }
-
-    .folder, .file {
-      margin: 15px;
-      padding: 10px;
-      border: 2px solid #556b2f;
-      border-radius: 12px;
-      background-color: rgba(0, 0, 0, 0.4);
-      width: fit-content;
-    }
-
-    .folder:hover, .file:hover {
-      background-color: rgba(85, 107, 47, 0.6);
+      border-radius: 8px;
+      box-shadow: 0 0 5px #000;
       cursor: pointer;
     }
 
-    .folder-icon, .file-icon {
-      display: inline-block;
-      width: 48px;
-      height: 48px;
-      vertical-align: middle;
-      background-size: contain;
-      margin-right: 10px;
+    .folder h3 {
+      margin: 0;
+      color: #9acd32;
+      font-size: 18px;
     }
 
-    .folder-icon {
-      background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064197.png');
+    ul {
+      list-style-type: none;
+      margin-left: 20px;
+      display: none;
     }
 
-    .file-icon {
-      background-image: url('https://cdn-icons-png.flaticon.com/512/337/337946.png');
+    a {
+      color: #90ee90;
+      text-decoration: none;
     }
 
-    .item-label {
-      display: inline-block;
-      vertical-align: middle;
-      color: #fff;
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .file {
+      margin: 5px 0;
+    }
+
+    .loading {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    .gear {
+      animation: spin 2s linear infinite;
+      width: 50px;
+      height: 50px;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <h1>Arquivo da banda de música do Comando de Operações Especiais</h1>
-  <input type="text" id="busca" placeholder="🔍 Buscar por nome do arquivo...">
-  <div id="conteudo"></div>
+  <h1>Arquivo da banda de música do Comando de Operações Es
 
-  <script>
-    const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
-
-    function criarHTML(pasta) {
-      let html = `<div class="folder" data-id="${pasta.id}">`;
-      html += `<div onclick="carregarPasta('${pasta.id}', this)">`;
-      html += `<span class="folder-icon"></span><span class="item-label">${pasta.nome}</span></div>`;
-
-      if (pasta.arquivos) {
-        for (const arquivo of pasta.arquivos) {
-          html += `<div class="file"><a href="${arquivo.url}" target="_blank">`;
-          html += `<span class="file-icon"></span><span class="item-label">${arquivo.nome}</span></a></div>`;
-        }
-      }
-
-      html += `</div>`;
-      return html;
-    }
-
-    function carregarPasta(id, elemento = null) {
-      const destino = elemento ? elemento.closest('.folder') : document.getElementById("conteudo");
-
-      fetch(`${URL}?id=${id}`)
-        .then(res => res.json())
-        .then(data => {
-          const html = criarHTML(data);
-          if (elemento) {
-            destino.innerHTML += html;
-          } else {
-            destino.innerHTML = html;
-          }
-        })
-        .catch(err => {
-          destino.innerHTML = "Erro ao carregar os arquivos 😢";
-          console.error(err);
-        });
-    }
-
-    // Busca por nome do arquivo ou pasta
-    document.getElementById("busca").addEventListener("input", function () {
-      const termo = this.value.toLowerCase();
-      const itens = document.querySelectorAll('.item-label');
-      itens.forEach(item => {
-        const container = item.closest('.folder') || item.closest('.file');
-        if (item.textContent.toLowerCase().includes(termo)) {
-          container.style.display = "";
-        } else {
-          container.style.display = "none";
-        }
-      });
-    });
-
-    window.onload = () => carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U");
-  </script>
-</body>
-</html>
 
 
