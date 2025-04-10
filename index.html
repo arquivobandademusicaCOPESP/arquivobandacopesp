@@ -1,93 +1,97 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Arquivos da Banda</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
     }
-
     .folder {
       margin-left: 20px;
-      border-left: 2px solid #ccc;
-      padding-left: 10px;
-      margin-bottom: 10px;
     }
-
-    h2, h3 {
-      color: #2c3e50;
-    }
-
     a {
+      color: blue;
       text-decoration: none;
-      color: #0077cc;
     }
-
     a:hover {
       text-decoration: underline;
     }
-
-    ul {
-      list-style-type: none;
-      padding-left: 20px;
+    #voltar {
+      margin-bottom: 20px;
+      display: none;
+    }
+    #pesquisa {
+      margin-bottom: 20px;
+      padding: 5px;
+      width: 300px;
     }
   </style>
 </head>
 <body>
-  <h2>🎵 Arquivos da Banda 🎶</h2>
+  <h1>Arquivos da Banda 🎵</h1>
+  <input type="text" id="pesquisa" placeholder="Pesquisar arquivo...">
+  <button id="voltar" onclick="voltar()">⬅️ Voltar</button>
   <div id="conteudo">Carregando...</div>
 
   <script>
     const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
+    const historico = [];
 
     function criarHTML(pasta) {
-      let html = `<div class="folder" data-id="${pasta.id}"><h3>📁 ${pasta.nome}</h3><ul>`;
-
-      // Subpastas
-      if (pasta.subpastas && pasta.subpastas.length > 0) {
-        for (const sub of pasta.subpastas) {
-          html += `<li>📁 <a href="#" onclick="carregarPasta('${sub.id}', this); return false;">${sub.nome}</a></li>`;
-        }
-      }
-
-      // Arquivos
-      if (pasta.arquivos && pasta.arquivos.length > 0) {
+      let html = `<div class="folder" data-id="${pasta.id}">
+                    <h3>📁 <a href="#" onclick="carregarPasta('${pasta.id}', this); return false;">${pasta.nome}</a></h3>
+                    <ul>`;
+      if (pasta.arquivos) {
         for (const arquivo of pasta.arquivos) {
-          html += `<li>📄 <a href="${arquivo.url}" target="_blank">${arquivo.nome}</a></li>`;
+          html += `<li class="arquivo"><a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a></li>`;
         }
       }
-
       html += `</ul></div>`;
       return html;
     }
 
     function carregarPasta(id, link = null) {
-      const destino = link ? link.closest('.folder') : document.getElementById("conteudo");
+      const destino = document.getElementById("conteudo");
+      if (link) historico.push(destino.innerHTML);
+      document.getElementById("voltar").style.display = historico.length > 0 ? "inline-block" : "none";
 
       fetch(`${URL}?id=${id}`)
         .then(res => res.json())
         .then(data => {
-          const html = criarHTML(data);
-          if (link) {
-            // Adiciona subpasta dentro da pasta clicada
-            const novaDiv = document.createElement("div");
-            novaDiv.innerHTML = html;
-            destino.appendChild(novaDiv);
-          } else {
-            // Primeira vez, substitui tudo
-            destino.innerHTML = html;
+          let html = criarHTML(data);
+          for (const sub of data.subpastas) {
+            html += criarHTML(sub);
           }
+          destino.innerHTML = html;
         })
         .catch(err => {
-          destino.innerHTML = "Erro ao carregar os arquivos 😢";
+          destino.innerHTML = "Erro ao carregar os arquivos 😭";
           console.error(err);
         });
     }
+
+    function voltar() {
+      const destino = document.getElementById("conteudo");
+      if (historico.length > 0) {
+        destino.innerHTML = historico.pop();
+        document.getElementById("voltar").style.display = historico.length > 0 ? "inline-block" : "none";
+      }
+    }
+
+    document.getElementById("pesquisa").addEventListener("input", function () {
+      const termo = this.value.toLowerCase();
+      const arquivos = document.querySelectorAll(".arquivo");
+      arquivos.forEach(el => {
+        const texto = el.textContent.toLowerCase();
+        el.style.display = texto.includes(termo) ? "list-item" : "none";
+      });
+    });
 
     // Carrega a pasta raiz ao iniciar
     window.onload = () => carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U");
   </script>
 </body>
 </html>
+
