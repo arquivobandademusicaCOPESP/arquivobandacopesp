@@ -1,40 +1,67 @@
-<script>
-  const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
-
-  function criarHTML(pasta) {
-    let html = `<div class="folder" data-id="${pasta.id}"><h3>📁 <a href="#" onclick="carregarPasta('${pasta.id}', this); return false;">${pasta.nome}</a></h3><ul>`;
-    
-    if (pasta.arquivos) {
-      for (const arquivo of pasta.arquivos) {
-        html += `<li><a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a></li>`;
-      }
+<<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Arquivos da Banda</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
     }
-    
-    html += `</ul></div>`;
-    return html;
-  }
+    .folder {
+      margin-left: 20px;
+    }
+    a {
+      text-decoration: none;
+      color: #2c3e50;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎼 Arquivos da Banda</h1>
+  <div id="conteudo">Carregando arquivos...</div>
 
-  function carregarPasta(id, link = null) {
-    const destino = link ? link.closest('.folder') : document.getElementById("conteudo");
+  <script>
+    const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
 
-    fetch(`${URL}?id=${id}`)
-      .then(res => res.json())
-      .then(data => {
-        const html = criarHTML(data);
-        if (link) {
-          // Se for uma subpasta, adiciona dentro da pasta clicada
-          destino.innerHTML += html;
-        } else {
-          // Se for a primeira vez (pasta raiz), substitui tudo
-          destino.innerHTML = html;
+    function criarHTML(pasta) {
+      let html = `<div class="folder" data-id="${pasta.id}"><h3>📁 <a href="#" onclick="carregarPasta('${pasta.id}', this); return false;">${pasta.nome}</a></h3><ul>`;
+      
+      if (pasta.arquivos) {
+        for (const arquivo of pasta.arquivos) {
+          html += `<li><a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a></li>`;
         }
-      })
-      .catch(err => {
-        destino.innerHTML = "Erro ao carregar os arquivos 😢";
-        console.error(err);
-      });
-  }
+      }
+      
+      html += `</ul></div>`;
+      return html;
+    }
 
-  // Carregar a pasta raiz ao iniciar
-  window.onload = () => carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U");
-</script>
+    function carregarPasta(id, link = null) {
+      const destino = link ? link.closest('.folder') : document.getElementById("conteudo");
+
+      fetch(`${URL}?id=${id}`)
+        .then(res => res.json())
+        .then(data => {
+          const html = criarHTML(data);
+          if (link) {
+            destino.innerHTML += html;
+          } else {
+            destino.innerHTML = html;
+          }
+        })
+        .catch(err => {
+          destino.innerHTML = "Erro ao carregar os arquivos 😢";
+          console.error(err);
+        });
+    }
+
+    window.onload = () => carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U");
+  </script>
+</body>
+</html>
