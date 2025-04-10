@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Arquivos da Banda de Música</title>
   <style>
     body {
@@ -9,12 +9,7 @@
       background: #f3f3f3;
       padding: 20px;
     }
-    .folder {
-      margin-left: 20px;
-      border-left: 2px solid #ccc;
-      padding-left: 10px;
-    }
-    h2, h3 {
+    h1, h2 {
       color: #2c3e50;
     }
     a {
@@ -24,16 +19,13 @@
     a:hover {
       text-decoration: underline;
     }
-    button {
-      background: none;
-      border: none;
-      color: #2980b9;
-      cursor: pointer;
-      font-size: 1em;
+    .folder {
+      margin-left: 20px;
+      border-left: 2px solid #ccc;
+      padding-left: 10px;
     }
-    .loading {
-      color: #999;
-      font-style: italic;
+    .subpastas {
+      margin-left: 20px;
     }
   </style>
 </head>
@@ -42,62 +34,55 @@
   <div id="conteudo">Carregando arquivos...</div>
 
   <script>
-    const URL_BASE = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
 
-    function criarHTML(pasta, nivel = 0) {
-      let html = `<div class="folder" style="margin-left:${nivel * 20}px">`;
-      html += `<h3>📁 ${pasta.nome}</h3><ul>`;
-      
-      if (pasta.arquivos) {
-        for (const arquivo of pasta.arquivos) {
-          html += `<li><a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a></li>`;
-        }
-      }
-
-      if (pasta.subpastas && pasta.subpastas.length > 0) {
-        for (const subpasta of pasta.subpastas) {
-          html += `<li><button onclick="carregarSubpasta('${subpasta.id}', this, ${nivel + 1})">➕ ${subpasta.nome}</button></li>`;
-        }
-      }
-
-      html += `</ul></div>`;
-      return html;
-    }
-
-    function carregarRaiz() {
-      fetch(URL_BASE)
+    function carregarPasta(id, container) {
+      fetch(`${API_URL}?id=${id}`)
         .then(res => res.json())
         .then(data => {
-          document.getElementById("conteudo").innerHTML = criarHTML(data);
+          const div = document.createElement('div');
+          div.className = 'folder';
+          div.innerHTML = `<h2>📁 ${data.nome}</h2>`;
+
+          if (data.arquivos.length > 0) {
+            const lista = document.createElement('ul');
+            for (const arquivo of data.arquivos) {
+              const item = document.createElement('li');
+              item.innerHTML = `<a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a>`;
+              lista.appendChild(item);
+            }
+            div.appendChild(lista);
+          }
+
+          if (data.subpastas.length > 0) {
+            const subDiv = document.createElement('div');
+            subDiv.className = 'subpastas';
+            for (const sub of data.subpastas) {
+              const subItem = document.createElement('div');
+              subItem.innerHTML = `<span style="cursor:pointer;">📁 ${sub.nome}</span>`;
+              subItem.addEventListener('click', () => {
+                // Evita carregar duas vezes
+                if (!subItem.dataset.carregado) {
+                  subItem.dataset.carregado = "true";
+                  carregarPasta(sub.id, subItem);
+                }
+              });
+              subDiv.appendChild(subItem);
+            }
+            div.appendChild(subDiv);
+          }
+
+          container.innerHTML = '';
+          container.appendChild(div);
         })
         .catch(err => {
-          document.getElementById("conteudo").innerHTML = "Erro ao carregar os arquivos 😢";
+          container.innerHTML = "Erro ao carregar os arquivos 😢";
           console.error(err);
         });
     }
 
-    function carregarSubpasta(id, botao, nivel) {
-      if (botao.proximoCarregado) return;
-
-      const container = document.createElement("div");
-      container.classList.add("loading");
-      container.innerText = "Carregando...";
-      botao.parentNode.appendChild(container);
-
-      fetch(`${URL_BASE}?id=${id}`)
-        .then(res => res.json())
-        .then(data => {
-          container.innerHTML = criarHTML(data, nivel);
-          botao.proximoCarregado = true;
-        })
-        .catch(err => {
-          container.innerHTML = "Erro ao carregar subpasta 😢";
-          console.error(err);
-        });
-    }
-
-    carregarRaiz();
+    // Carrega pasta raiz ao iniciar
+    carregarPasta('', document.getElementById("conteudo"));
   </script>
 </body>
 </html>
-
