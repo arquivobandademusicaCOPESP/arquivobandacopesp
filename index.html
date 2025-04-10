@@ -16,6 +16,7 @@
     }
     h2, h3 {
       color: #2c3e50;
+      cursor: pointer;
     }
     a {
       color: #2980b9;
@@ -31,35 +32,59 @@
   <div id="conteudo">Carregando arquivos...</div>
 
   <script>
-    const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
+    const API = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
+
+    async function carregarPasta(id, container) {
+      container.innerHTML = "Carregando...";
+      try {
+        const res = await fetch(`${API}?id=${id}`);
+        const data = await res.json();
+        container.innerHTML = criarHTML(data);
+      } catch (e) {
+        container.innerHTML = "Erro ao carregar os arquivos 😢";
+      }
+    }
 
     function criarHTML(pasta) {
-      let html = `<div class="folder"><h3>📁 ${pasta.nome}</h3><ul>`;
+      let html = `<div class="folder">
+        <h3 onclick="toggleSubpasta('${pasta.id}')">📁 ${pasta.nome}</h3>
+        <ul>`;
+
       if (pasta.arquivos) {
         for (const arquivo of pasta.arquivos) {
           html += `<li><a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a></li>`;
         }
       }
+
       html += `</ul>`;
+
       if (pasta.subpastas) {
-        for (const subpasta of pasta.subpastas) {
-          html += criarHTML(subpasta);
+        for (const sub of pasta.subpastas) {
+          html += `<div id="sub_${sub.id}">
+            <h3 onclick="carregarSubpasta('${sub.id}')">📁 ${sub.nome}</h3>
+            <div id="conteudo_${sub.id}" class="folder"></div>
+          </div>`;
         }
       }
+
       html += `</div>`;
       return html;
     }
 
-    fetch(URL)
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("conteudo").innerHTML = criarHTML(data);
-      })
-      .catch(err => {
-        document.getElementById("conteudo").innerHTML = "Erro ao carregar os arquivos 😢";
-        console.error(err);
-      });
+    function carregarSubpasta(id) {
+      const conteudo = document.getElementById("conteudo_" + id);
+      if (conteudo.innerHTML.trim() === "") {
+        carregarPasta(id, conteudo);
+      } else {
+        conteudo.innerHTML = ""; // recolher
+      }
+    }
+
+    // Iniciar com a pasta raiz
+    window.onload = () => {
+      const root = document.getElementById("conteudo");
+      carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U", root);
+    };
   </script>
 </body>
 </html>
-
