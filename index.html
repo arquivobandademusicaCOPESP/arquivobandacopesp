@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -9,126 +6,128 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #2c2f2c;
-      color: #fff;
+      background-color: #2d2d2d;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #1b1b1b;
       padding: 20px;
-    }
-
-    h1 {
       text-align: center;
-      color: #c0cfa1;
+      font-size: 22px;
+      font-weight: bold;
+      color: #9acd32;
     }
 
-    .folder {
-      margin-left: 20px;
-      margin-bottom: 10px;
-    }
-
-    .folder h3 {
-      cursor: pointer;
+    #loader {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      color: #aaffaa;
+      margin-top: 100px;
     }
 
-    .spinner {
-      display: flex;
-      justify-content: center;
-      margin: 40px 0;
-    }
-
-    .gear {
-      width: 60px;
-      height: 60px;
-      border: 6px solid #ccc;
-      border-top: 6px solid #6f6;
-      border-radius: 50%;
+    #loader img {
+      width: 64px;
+      height: 64px;
       animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
-    a {
-      color: #9fe;
-      text-decoration: none;
+    #conteudo {
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: center;
     }
 
-    a:hover {
-      text-decoration: underline;
+    .folder {
+      text-align: center;
+      cursor: pointer;
+      width: 120px;
+    }
+
+    .folder img {
+      width: 80px;
+      height: 80px;
+    }
+
+    .folder span {
+      display: block;
+      margin-top: 8px;
+      font-weight: bold;
+      color: white;
     }
   </style>
 </head>
 <body>
-  <h1>Arquivo da banda de música do Comando de Operações Especiais</h1>
-  <div id="carregando" class="spinner"><div class="gear"></div></div>
+  <header>Arquivo da banda de música do Comando de Operações Especiais</header>
+
+  <div id="loader">
+    <img src="https://i.imgur.com/llF5iyg.gif" alt="Carregando...">
+    <p>carregando... aguarde!</p>
+  </div>
+
   <div id="conteudo" style="display: none;"></div>
 
   <script>
     const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
 
-    function criarHTML(pasta) {
-      let html = `<div class="folder"><h3 onclick="mostrarArquivos(this)">📁 ${pasta.nome}</h3><ul style="display:none;" class="arquivos" data-id="${pasta.id}">`;
+    function criarPastasPrincipais(data) {
+      const conteudo = document.getElementById("conteudo");
+      conteudo.innerHTML = '';
 
-      html += `</ul></div>`;
+      for (const subpasta of data.subpastas) {
+        const div = document.createElement("div");
+        div.className = "folder";
+        div.onclick = () => abrirSubpasta(subpasta.id, div);
 
-      if (pasta.subpastas) {
-        for (const sub of pasta.subpastas) {
-          html += criarHTML(sub);
-        }
+        div.innerHTML = `
+          <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png" alt="Pasta">
+          <span>${subpasta.nome}</span>
+        `;
+
+        conteudo.appendChild(div);
       }
 
-      return html;
+      document.getElementById("loader").style.display = "none";
+      conteudo.style.display = "flex";
     }
 
-    function mostrarArquivos(elemento) {
-      const ul = elemento.nextElementSibling;
-      const id = ul.getAttribute("data-id");
-
-      if (ul.dataset.carregado) {
-        ul.style.display = ul.style.display === "none" ? "block" : "none";
-        return;
-      }
-
-      ul.innerHTML = "<li>🔄 Carregando arquivos...</li>";
-      ul.style.display = "block";
-
+    function abrirSubpasta(id, div) {
+      div.innerHTML += `<p style="color: yellow;">Carregando...</p>`;
       fetch(`${URL}?id=${id}`)
         .then(res => res.json())
         .then(data => {
-          ul.innerHTML = "";
-          if (data.arquivos && data.arquivos.length > 0) {
-            for (const arquivo of data.arquivos) {
-              ul.innerHTML += `<li><a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a></li>`;
-            }
-          } else {
-            ul.innerHTML = "<li><i>Sem arquivos nesta pasta</i></li>";
-          }
-          ul.dataset.carregado = true;
+          const ul = document.createElement("ul");
+          data.arquivos.forEach(arq => {
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="${arq.url}" target="_blank" style="color: lightblue;">📄 ${arq.nome}</a>`;
+            ul.appendChild(li);
+          });
+          div.appendChild(ul);
         })
-        .catch(() => {
-          ul.innerHTML = "<li>Erro ao carregar arquivos.</li>";
+        .catch(err => {
+          div.innerHTML += `<p style="color:red;">Erro ao abrir pasta.</p>`;
+          console.error(err);
         });
     }
 
-    function carregarTudo() {
-      fetch(URL)
+    window.onload = () => {
+      fetch(`${URL}?id=1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U`)
         .then(res => res.json())
-        .then(data => {
-          const html = criarHTML(data);
-          document.getElementById("conteudo").innerHTML = html;
-          document.getElementById("carregando").style.display = "none";
-          document.getElementById("conteudo").style.display = "block";
-        })
-        .catch(() => {
-          document.getElementById("carregando").innerHTML = "Erro ao carregar pastas.";
+        .then(data => criarPastasPrincipais(data))
+        .catch(err => {
+          document.getElementById("loader").innerHTML = "<p>Erro ao carregar as pastas 😢</p>";
+          console.error(err);
         });
-    }
-
-    window.onload = carregarTudo;
+    };
   </script>
 </body>
 </html>
