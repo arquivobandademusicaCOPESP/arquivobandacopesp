@@ -1,120 +1,99 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arquivos da Banda Militar</title>
+  <meta charset="UTF-8">
+  <title>Arquivo da banda de música do Comando de Operações Especiais</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-image: url('https://www.transparenttextures.com/patterns/army-camo.png');
-      background-color: #2d2d2d;
-      color: #fff;
-      margin: 0;
-      padding: 0;
-    }
-
-    header {
-      background-color: #1a1a1a;
-      padding: 1rem;
-      text-align: center;
-      border-bottom: 4px solid #4caf50;
+      font-family: Arial, sans-serif;
+      background: #2e2e2e url('https://www.transparenttextures.com/patterns/camouflage.png');
+      color: #f0f0f0;
+      padding: 20px;
     }
 
     h1 {
-      margin: 0;
-      color: #4caf50;
-    }
-
-    #pesquisa {
-      padding: 1rem;
       text-align: center;
+      color: #9acd32;
     }
 
-    #pesquisa input {
-      width: 60%;
-      padding: 0.5rem;
-      font-size: 1rem;
-      border-radius: 5px;
-      border: none;
+    #busca {
+      display: block;
+      margin: 20px auto;
+      padding: 10px;
+      width: 80%;
+      font-size: 16px;
     }
 
     .folder, .file {
-      background-color: rgba(0, 0, 0, 0.4);
-      margin: 10px auto;
-      max-width: 600px;
+      margin: 15px;
       padding: 10px;
-      border-radius: 10px;
+      border: 2px solid #556b2f;
+      border-radius: 12px;
+      background-color: rgba(0, 0, 0, 0.4);
+      width: fit-content;
     }
 
-    .folder h3 {
+    .folder:hover, .file:hover {
+      background-color: rgba(85, 107, 47, 0.6);
       cursor: pointer;
-      margin-bottom: 5px;
     }
 
-    .folder h3:hover {
-      color: #4caf50;
-    }
-
-    .folder img, .file img {
-      width: 32px;
+    .folder-icon, .file-icon {
+      display: inline-block;
+      width: 48px;
+      height: 48px;
       vertical-align: middle;
+      background-size: contain;
       margin-right: 10px;
     }
 
-    a {
-      color: #aaffaa;
-      text-decoration: none;
+    .folder-icon {
+      background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064197.png');
     }
 
-    a:hover {
-      text-decoration: underline;
+    .file-icon {
+      background-image: url('https://cdn-icons-png.flaticon.com/512/337/337946.png');
+    }
+
+    .item-label {
+      display: inline-block;
+      vertical-align: middle;
+      color: #fff;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>🎖 Arquivos da Banda Militar</h1>
-  </header>
-
-  <section id="pesquisa">
-    <input type="text" id="barraBusca" placeholder="🔍 Buscar arquivo..." oninput="buscarArquivo()">
-  </section>
-
+  <h1>Arquivo da banda de música do Comando de Operações Especiais</h1>
+  <input type="text" id="busca" placeholder="🔍 Buscar por nome do arquivo...">
   <div id="conteudo"></div>
 
   <script>
     const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
 
     function criarHTML(pasta) {
-      let html = `<div class="folder" data-id="${pasta.id}">
-                    <h3 onclick="carregarPasta('${pasta.id}', this)">
-                      <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Pasta"> 
-                      ${pasta.nome}
-                    </h3>
-                    <ul>`;
-      
+      let html = `<div class="folder" data-id="${pasta.id}">`;
+      html += `<div onclick="carregarPasta('${pasta.id}', this)">`;
+      html += `<span class="folder-icon"></span><span class="item-label">${pasta.nome}</span></div>`;
+
       if (pasta.arquivos) {
         for (const arquivo of pasta.arquivos) {
-          html += `<li class="file">
-                     <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" alt="Arquivo"> 
-                     <a href="${arquivo.url}" target="_blank">${arquivo.nome}</a>
-                   </li>`;
+          html += `<div class="file"><a href="${arquivo.url}" target="_blank">`;
+          html += `<span class="file-icon"></span><span class="item-label">${arquivo.nome}</span></a></div>`;
         }
       }
-      
-      html += `</ul></div>`;
+
+      html += `</div>`;
       return html;
     }
 
-    function carregarPasta(id, link = null) {
-      const destino = link ? link.closest('.folder') : document.getElementById("conteudo");
+    function carregarPasta(id, elemento = null) {
+      const destino = elemento ? elemento.closest('.folder') : document.getElementById("conteudo");
 
       fetch(`${URL}?id=${id}`)
         .then(res => res.json())
         .then(data => {
           const html = criarHTML(data);
-          if (link) {
+          if (elemento) {
             destino.innerHTML += html;
           } else {
             destino.innerHTML = html;
@@ -126,14 +105,19 @@
         });
     }
 
-    function buscarArquivo() {
-      const termo = document.getElementById("barraBusca").value.toLowerCase();
-      const arquivos = document.querySelectorAll("li.file");
-      arquivos.forEach(file => {
-        const texto = file.innerText.toLowerCase();
-        file.style.display = texto.includes(termo) ? "" : "none";
+    // Busca por nome do arquivo ou pasta
+    document.getElementById("busca").addEventListener("input", function () {
+      const termo = this.value.toLowerCase();
+      const itens = document.querySelectorAll('.item-label');
+      itens.forEach(item => {
+        const container = item.closest('.folder') || item.closest('.file');
+        if (item.textContent.toLowerCase().includes(termo)) {
+          container.style.display = "";
+        } else {
+          container.style.display = "none";
+        }
       });
-    }
+    });
 
     window.onload = () => carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U");
   </script>
