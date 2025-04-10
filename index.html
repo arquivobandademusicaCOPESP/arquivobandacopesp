@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Arquivos da Banda de Música</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      padding: 20px;
+    }
+    .folder {
+      margin-left: 20px;
+      border-left: 2px solid #ccc;
+      padding-left: 10px;
+    }
+    h2, h3 {
+      color: #2c3e50;
+    }
+    a {
+      color: #2980b9;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎵 Arquivos da Banda de Música</h1>
+  <div id="conteudo">Carregando arquivos...</div>
+
+  <script>
+    const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
+
+    function criarHTML(pasta) {
+      let html = `<div class="folder"><h3>📁 ${pasta.nome}</h3><ul>`;
+      if (pasta.arquivos) {
+        for (const arquivo of pasta.arquivos) {
+          html += `<li><a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a></li>`;
+        }
+      }
+      html += `</ul>`;
+      if (pasta.subpastas) {
+        for (const subpasta of pasta.subpastas) {
+          html += criarHTML(subpasta);
+        }
+      }
+      html += `</div>`;
+      return html;
+    }
+
+    fetch(URL)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("conteudo").innerHTML = criarHTML(data);
+      })
+      .catch(err => {
+        document.getElementById("conteudo").innerHTML = "Erro ao carregar os arquivos 😢";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
+
