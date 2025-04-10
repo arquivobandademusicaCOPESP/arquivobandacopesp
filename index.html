@@ -2,96 +2,142 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Arquivos da Banda</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arquivos da Banda Militar</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: url('https://www.transparenttextures.com/patterns/army-camo.png');
+      background-color: #2d2d2d;
+      color: #fff;
+      margin: 0;
+      padding: 0;
     }
-    .folder {
-      margin-left: 20px;
+
+    header {
+      background-color: #1a1a1a;
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 4px solid #4caf50;
     }
+
+    h1 {
+      margin: 0;
+      color: #4caf50;
+    }
+
+    #pesquisa {
+      padding: 1rem;
+      text-align: center;
+    }
+
+    #pesquisa input {
+      width: 60%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: none;
+    }
+
+    .folder, .file {
+      background-color: rgba(0, 0, 0, 0.4);
+      margin: 10px auto;
+      max-width: 600px;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .folder h3 {
+      cursor: pointer;
+      margin-bottom: 5px;
+    }
+
+    .folder h3:hover {
+      color: #4caf50;
+    }
+
+    .folder img, .file img {
+      width: 32px;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+
     a {
-      color: blue;
+      color: #aaffaa;
       text-decoration: none;
     }
+
     a:hover {
       text-decoration: underline;
-    }
-    #voltar {
-      margin-bottom: 20px;
-      display: none;
-    }
-    #pesquisa {
-      margin-bottom: 20px;
-      padding: 5px;
-      width: 300px;
     }
   </style>
 </head>
 <body>
-  <h1>Arquivos da Banda 🎵</h1>
-  <input type="text" id="pesquisa" placeholder="Pesquisar arquivo...">
-  <button id="voltar" onclick="voltar()">⬅️ Voltar</button>
-  <div id="conteudo">Carregando...</div>
+  <header>
+    <h1>🎖 Arquivos da Banda Militar</h1>
+  </header>
+
+  <section id="pesquisa">
+    <input type="text" id="barraBusca" placeholder="🔍 Buscar arquivo..." oninput="buscarArquivo()">
+  </section>
+
+  <div id="conteudo"></div>
 
   <script>
     const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
-    const historico = [];
 
     function criarHTML(pasta) {
       let html = `<div class="folder" data-id="${pasta.id}">
-                    <h3>📁 <a href="#" onclick="carregarPasta('${pasta.id}', this); return false;">${pasta.nome}</a></h3>
+                    <h3 onclick="carregarPasta('${pasta.id}', this)">
+                      <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Pasta"> 
+                      ${pasta.nome}
+                    </h3>
                     <ul>`;
+      
       if (pasta.arquivos) {
         for (const arquivo of pasta.arquivos) {
-          html += `<li class="arquivo"><a href="${arquivo.url}" target="_blank">📄 ${arquivo.nome}</a></li>`;
+          html += `<li class="file">
+                     <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" alt="Arquivo"> 
+                     <a href="${arquivo.url}" target="_blank">${arquivo.nome}</a>
+                   </li>`;
         }
       }
+      
       html += `</ul></div>`;
       return html;
     }
 
     function carregarPasta(id, link = null) {
-      const destino = document.getElementById("conteudo");
-      if (link) historico.push(destino.innerHTML);
-      document.getElementById("voltar").style.display = historico.length > 0 ? "inline-block" : "none";
+      const destino = link ? link.closest('.folder') : document.getElementById("conteudo");
 
       fetch(`${URL}?id=${id}`)
         .then(res => res.json())
         .then(data => {
-          let html = criarHTML(data);
-          for (const sub of data.subpastas) {
-            html += criarHTML(sub);
+          const html = criarHTML(data);
+          if (link) {
+            destino.innerHTML += html;
+          } else {
+            destino.innerHTML = html;
           }
-          destino.innerHTML = html;
         })
         .catch(err => {
-          destino.innerHTML = "Erro ao carregar os arquivos 😭";
+          destino.innerHTML = "Erro ao carregar os arquivos 😢";
           console.error(err);
         });
     }
 
-    function voltar() {
-      const destino = document.getElementById("conteudo");
-      if (historico.length > 0) {
-        destino.innerHTML = historico.pop();
-        document.getElementById("voltar").style.display = historico.length > 0 ? "inline-block" : "none";
-      }
+    function buscarArquivo() {
+      const termo = document.getElementById("barraBusca").value.toLowerCase();
+      const arquivos = document.querySelectorAll("li.file");
+      arquivos.forEach(file => {
+        const texto = file.innerText.toLowerCase();
+        file.style.display = texto.includes(termo) ? "" : "none";
+      });
     }
 
-    document.getElementById("pesquisa").addEventListener("input", function () {
-      const termo = this.value.toLowerCase();
-      const arquivos = document.querySelectorAll(".arquivo");
-      arquivos.forEach(el => {
-        const texto = el.textContent.toLowerCase();
-        el.style.display = texto.includes(termo) ? "list-item" : "none";
-      });
-    });
-
-    // Carrega a pasta raiz ao iniciar
     window.onload = () => carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U");
   </script>
 </body>
 </html>
+
 
