@@ -7,20 +7,35 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-image: url('https://www.transparenttextures.com/patterns/camo.png'); /* textura camuflada */
-      background-color: #2e2e2e;
-      background-size: 300px;
+      background-image: url('https://i.imgur.com/T3P0vvF.jpg'); /* fundo camuflado realista */
+      background-size: cover;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
       color: #fff;
     }
 
     header {
-      background-color: #1a1a1a;
+      background-color: rgba(0, 0, 0, 0.6);
       padding: 20px;
       text-align: center;
       font-size: 1.8em;
       font-weight: bold;
-      color: #d2d2d2;
       border-bottom: 2px solid #444;
+    }
+
+    #busca {
+      display: flex;
+      justify-content: center;
+      padding: 15px;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    #busca input {
+      width: 60%;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 10px;
+      border: none;
     }
 
     #conteudo {
@@ -32,7 +47,7 @@
     }
 
     .folder {
-      background-color: #3b3b3b;
+      background-color: rgba(0, 0, 0, 0.5);
       border: 2px solid #555;
       border-radius: 12px;
       padding: 15px;
@@ -40,11 +55,12 @@
       text-align: center;
       cursor: pointer;
       transition: transform 0.2s;
+      color: #fff;
     }
 
     .folder:hover {
       transform: scale(1.05);
-      background-color: #4a4a4a;
+      background-color: rgba(30, 30, 30, 0.8);
     }
 
     .folder img {
@@ -86,9 +102,11 @@
   </style>
 </head>
 <body>
-  <header>
-    Arquivo da banda de música do Comando de Operações Especiais
-  </header>
+  <header>Arquivo da banda de música do Comando de Operações Especiais</header>
+
+  <div id="busca">
+    <input type="text" id="pesquisa" placeholder="🔍 Buscar arquivos...">
+  </div>
 
   <div id="loading">
     <img src="https://cdn-icons-png.flaticon.com/512/189/189792.png" alt="Carregando...">
@@ -106,6 +124,7 @@
 
   <script>
     const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
+    let arquivosIndexados = [];
 
     function criarHTML(pasta) {
       let html = "";
@@ -118,6 +137,10 @@
               <div>${subpasta.nome}</div>
             </div>`;
         }
+      }
+
+      if (pasta.arquivos) {
+        arquivosIndexados.push(...pasta.arquivos);
       }
 
       return html;
@@ -138,13 +161,24 @@
         });
     }
 
-    // Carrega a pasta principal ao iniciar
+    // Busca arquivos digitando 3 letras
+    document.getElementById("pesquisa").addEventListener("input", function() {
+      const termo = this.value.trim().toLowerCase();
+      const conteudo = document.getElementById("conteudo");
+
+      if (termo.length >= 3) {
+        const resultados = arquivosIndexados.filter(arq => arq.nome.toLowerCase().includes(termo));
+        conteudo.innerHTML = resultados.map(arq => `
+          <div class="folder">
+            <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" alt="Arquivo">
+            <a href="${arq.url}" target="_blank">${arq.nome}</a>
+          </div>`).join('');
+      } else {
+        carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U");
+      }
+    });
+
     window.onload = () => carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U");
   </script>
-</body>
-</html>
-
-
-
 </body>
 </html>
