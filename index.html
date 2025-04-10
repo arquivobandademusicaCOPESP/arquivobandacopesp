@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Arquivo da banda de música do Comando de Operações Especiais</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-image: url('https://www.publicdomainpictures.net/pictures/270000/velka/camouflage-pattern.jpg');
+      background-image: url('https://cdn.pixabay.com/photo/2013/07/12/15/37/camouflage-150019_960_720.png');
       background-size: cover;
+      background-attachment: fixed;
       color: #fff;
     }
 
     h1 {
       text-align: center;
-      margin-top: 20px;
-      font-size: 28px;
+      padding-top: 20px;
+      font-size: 26px;
       text-shadow: 2px 2px 4px #000;
     }
 
@@ -27,6 +28,7 @@
       border-radius: 5px;
       border: none;
       font-size: 16px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.5);
     }
 
     #carregando {
@@ -35,6 +37,8 @@
       align-items: center;
       margin-top: 60px;
       font-size: 18px;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px #000;
     }
 
     #carregando img {
@@ -53,6 +57,7 @@
       text-align: center;
       margin: 15px;
       cursor: pointer;
+      width: 120px;
     }
 
     .pasta img {
@@ -64,6 +69,17 @@
 
     .arquivo {
       display: none;
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
 
     #responsaveis {
@@ -72,16 +88,17 @@
       right: 20px;
       text-align: right;
       font-size: 14px;
+      line-height: 1.4;
       text-shadow: 1px 1px 3px #000;
     }
   </style>
 </head>
 <body>
   <h1>Arquivo da banda de música do Comando de Operações Especiais</h1>
-  <input type="text" id="pesquisa" placeholder="Pesquisar arquivos..." oninput="pesquisarArquivos()">
-  
+  <input type="text" id="pesquisa" placeholder="Pesquisar arquivos..." oninput="pesquisarArquivos()" />
+
   <div id="carregando">
-    <img src="https://i.imgur.com/llF5iyg.gif" alt="Carregando...">
+    <img src="https://i.imgur.com/llF5iyg.gif" alt="Carregando..." />
     <div>Carregando... aguarde!</div>
   </div>
 
@@ -118,8 +135,9 @@
       fetch(`${URL}?id=${id}`)
         .then(res => res.json())
         .then(data => {
+          const arquivosHTML = criarArquivosHTML(data.arquivos);
           const div = document.createElement('div');
-          div.innerHTML = criarArquivosHTML(data.arquivos);
+          div.innerHTML = arquivosHTML;
           el.appendChild(div);
         });
     }
@@ -152,5 +170,6 @@
   </script>
 </body>
 </html>
+
 
 
