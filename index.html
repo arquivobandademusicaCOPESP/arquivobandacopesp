@@ -5,138 +5,145 @@
   <title>Arquivo da banda de música do Comando de Operações Especiais</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #2d2d2d;
-      color: white;
       margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      background-image: url('https://www.transparenttextures.com/patterns/camo.png'); /* textura camuflada */
+      background-color: #2e2e2e;
+      background-size: 300px;
+      color: #fff;
     }
 
     header {
-      background-color: #1b1b1b;
+      background-color: #1a1a1a;
       padding: 20px;
       text-align: center;
-      font-size: 22px;
+      font-size: 1.8em;
       font-weight: bold;
-      color: #9acd32;
-    }
-
-    #loader {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 100px;
-    }
-
-    #loader img {
-      width: 64px;
-      height: 64px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      color: #d2d2d2;
+      border-bottom: 2px solid #444;
     }
 
     #conteudo {
       padding: 20px;
       display: flex;
       flex-wrap: wrap;
-      gap: 30px;
-      justify-content: center;
+      gap: 20px;
+      justify-content: flex-start;
     }
 
     .folder {
+      background-color: #3b3b3b;
+      border: 2px solid #555;
+      border-radius: 12px;
+      padding: 15px;
+      width: 160px;
       text-align: center;
       cursor: pointer;
-      width: 120px;
+      transition: transform 0.2s;
+    }
+
+    .folder:hover {
+      transform: scale(1.05);
+      background-color: #4a4a4a;
     }
 
     .folder img {
       width: 80px;
       height: 80px;
+      margin-bottom: 10px;
     }
 
-    .folder span {
-      display: block;
-      margin-top: 8px;
-      font-weight: bold;
-      color: white;
+    #loading {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 1.2em;
+      color: #ccc;
+    }
+
+    #loading img {
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    footer {
+      position: fixed;
+      bottom: 10px;
+      right: 20px;
+      text-align: right;
+      font-size: 0.9em;
+      color: #ccc;
+      line-height: 1.4;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 8px 12px;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <header>Arquivo da banda de música do Comando de Operações Especiais</header>
+  <header>
+    Arquivo da banda de música do Comando de Operações Especiais
+  </header>
 
-  <div id="loader">
-    <img src="https://i.imgur.com/llF5iyg.gif" alt="Carregando...">
-    <p>carregando... aguarde!</p>
+  <div id="loading">
+    <img src="https://cdn-icons-png.flaticon.com/512/189/189792.png" alt="Carregando...">
+    <div>carregando... aguarde!</div>
   </div>
 
   <div id="conteudo" style="display: none;"></div>
 
-  <script>
-    const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
-
-    function criarPastasPrincipais(data) {
-      const conteudo = document.getElementById("conteudo");
-      conteudo.innerHTML = '';
-
-      for (const subpasta of data.subpastas) {
-        const div = document.createElement("div");
-        div.className = "folder";
-        div.onclick = () => abrirSubpasta(subpasta.id, div);
-
-        div.innerHTML = `
-          <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png" alt="Pasta">
-          <span>${subpasta.nome}</span>
-        `;
-
-        conteudo.appendChild(div);
-      }
-
-      document.getElementById("loader").style.display = "none";
-      conteudo.style.display = "flex";
-    }
-
-    function abrirSubpasta(id, div) {
-      div.innerHTML += `<p style="color: yellow;">Carregando...</p>`;
-      fetch(`${URL}?id=${id}`)
-        .then(res => res.json())
-        .then(data => {
-          const ul = document.createElement("ul");
-          data.arquivos.forEach(arq => {
-            const li = document.createElement("li");
-            li.innerHTML = `<a href="${arq.url}" target="_blank" style="color: lightblue;">📄 ${arq.nome}</a>`;
-            ul.appendChild(li);
-          });
-          div.appendChild(ul);
-        })
-        .catch(err => {
-          div.innerHTML += `<p style="color:red;">Erro ao abrir pasta.</p>`;
-          console.error(err);
-        });
-    }
-
-    window.onload = () => {
-      fetch(`${URL}?id=1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U`)
-        .then(res => res.json())
-        .then(data => criarPastasPrincipais(data))
-        .catch(err => {
-          document.getElementById("loader").innerHTML = "<p>Erro ao carregar as pastas 😢</p>";
-          console.error(err);
-        });
-    };
-  </script>
-<footer style="position: fixed; bottom: 10px; right: 20px; font-size: 0.9em; color: #ccc; text-align: right; line-height: 1.4;">
-  <p style="margin: 0;">
+  <footer>
     Responsáveis:<br>
     2º SGT Cesar Augusto.<br>
     SD Procópio.<br>
     SD Correia.
-  </p>
-</footer>
+  </footer>
+
+  <script>
+    const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
+
+    function criarHTML(pasta) {
+      let html = "";
+
+      if (pasta.subpastas) {
+        for (const subpasta of pasta.subpastas) {
+          html += `
+            <div class="folder" onclick="carregarPasta('${subpasta.id}', this)">
+              <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png" alt="Pasta">
+              <div>${subpasta.nome}</div>
+            </div>`;
+        }
+      }
+
+      return html;
+    }
+
+    function carregarPasta(id, el = null) {
+      fetch(`${URL}?id=${id}`)
+        .then(res => res.json())
+        .then(data => {
+          const conteudo = document.getElementById("conteudo");
+          conteudo.innerHTML = criarHTML(data);
+          document.getElementById("loading").style.display = "none";
+          conteudo.style.display = "flex";
+        })
+        .catch(err => {
+          document.getElementById("loading").innerHTML = "Erro ao carregar 😢";
+          console.error(err);
+        });
+    }
+
+    // Carrega a pasta principal ao iniciar
+    window.onload = () => carregarPasta("1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U");
+  </script>
+</body>
+</html>
+
 
 
 </body>
