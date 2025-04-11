@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,168 +6,189 @@
   <title>Arquivo da banda de música do Comando de Operações Especiais</title>
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background-image: url('https://cdn.pixabay.com/photo/2013/07/12/15/37/camouflage-150019_960_720.png');
-      background-size: cover;
-      background-attachment: fixed;
-      color: #fff;
+      background-color: #e6e6e6;
+      margin: 0;
+      padding: 0;
     }
 
-    h1 {
+    header {
+      background-color: #2d3e2f;
+      color: white;
+      padding: 20px;
       text-align: center;
-      padding-top: 20px;
-      font-size: 26px;
-      text-shadow: 2px 2px 4px #000;
+      font-size: 22px;
     }
 
     #pesquisa {
       display: block;
       margin: 20px auto;
+      width: 90%;
+      max-width: 500px;
       padding: 10px;
-      width: 300px;
-      border-radius: 5px;
-      border: none;
       font-size: 16px;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
 
-    #carregando {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 60px;
-      font-size: 18px;
-      font-weight: bold;
-      text-shadow: 1px 1px 3px #000;
+    #loading {
+      text-align: center;
+      margin-top: 40px;
     }
 
-    #carregando img {
+    #loading img {
       width: 80px;
       height: 80px;
+      animation: spin 2s linear infinite;
     }
 
-    #conteudo {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
       padding: 20px;
     }
 
-    .pasta {
+    .folder {
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
       text-align: center;
-      margin: 15px;
-      cursor: pointer;
-      width: 120px;
+      transition: transform 0.2s;
     }
 
-    .pasta img {
-      width: 80px;
-      height: 80px;
-      display: block;
-      margin: 0 auto 5px;
+    .folder:hover {
+      transform: scale(1.03);
     }
 
-    .arquivo {
-      display: none;
-      margin: 5px 0;
+    .folder img {
+      width: 64px;
+      height: 64px;
+    }
+
+    .folder-name {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .arquivos {
+      margin-top: 10px;
+      text-align: left;
       font-size: 14px;
     }
 
-    a {
-      color: #fff;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    #responsaveis {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
+    footer {
+      background-color: #2d3e2f;
+      color: white;
+      padding: 15px;
+      font-size: 14px;
       text-align: right;
-      font-size: 14px;
-      line-height: 1.4;
-      text-shadow: 1px 1px 3px #000;
     }
   </style>
 </head>
 <body>
-  <h1>Arquivo da banda de música do Comando de Operações Especiais</h1>
-  <input type="text" id="pesquisa" placeholder="Pesquisar arquivos..." oninput="pesquisarArquivos()" />
+  <header>Arquivo da banda de música do Comando de Operações Especiais</header>
 
-  <div id="carregando">
-    <img src="https://i.imgur.com/llF5iyg.gif" alt="Carregando..." />
-    <div>Carregando... aguarde!</div>
+  <input type="text" id="pesquisa" placeholder="🔍 Buscar arquivos... (mínimo 3 letras)" oninput="pesquisarArquivos()">
+
+  <div id="loading">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/d/de/Ajax-loader.gif" alt="Carregando...">
+    <p>carregando... aguarde!</p>
   </div>
 
-  <div id="conteudo"></div>
+  <div id="conteudo" class="grid" style="display: none;"></div>
 
-  <div id="responsaveis">
+  <footer>
     Responsáveis:<br>
     2º SGT Cesar Augusto.<br>
     SD Procópio.<br>
     SD Correia.
-  </div>
+  </footer>
 
   <script>
     const URL = "https://script.google.com/macros/s/AKfycby_jTo4pWLeGMn9eKcxA0jAVyfwS6xv8ZUroOFkNMyCRN1CBaqwIMTW-W3j0ViDC0rl/exec";
 
-    function criarPastaHTML(pasta) {
+    let todasAsPastas = [];
+
+    function criarCartaoPasta(pasta) {
       return `
-        <div class="pasta" onclick="abrirPasta('${pasta.id}', this)">
+        <div class="folder" data-id="${pasta.id}">
           <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png" alt="Pasta">
-          <div>${pasta.nome}</div>
+          <div class="folder-name">${pasta.nome}</div>
+          <div class="arquivos" id="arquivos-${pasta.id}"></div>
+          <button onclick="abrirPasta('${pasta.id}')">📂 Abrir</button>
         </div>
       `;
     }
 
-    function criarArquivosHTML(arquivos) {
-      return arquivos.map(arq => `
-        <div class="arquivo" data-nome="${arq.nome.toLowerCase()}">
-          📄 <a href="${arq.url}" target="_blank">${arq.nome}</a>
-        </div>
-      `).join('');
-    }
-
-    function abrirPasta(id, el) {
+    function abrirPasta(id) {
       fetch(`${URL}?id=${id}`)
         .then(res => res.json())
         .then(data => {
-          const arquivosHTML = criarArquivosHTML(data.arquivos);
-          const div = document.createElement('div');
-          div.innerHTML = arquivosHTML;
-          el.appendChild(div);
+          const container = document.getElementById(`arquivos-${id}`);
+          if (data.arquivos.length === 0) {
+            container.innerHTML = "<p>📂 Pasta vazia</p>";
+            return;
+          }
+          let html = "<ul>";
+          for (const arq of data.arquivos) {
+            html += `<li><a href="${arq.url}" target="_blank">📄 ${arq.nome}</a></li>`;
+          }
+          html += "</ul>";
+          container.innerHTML = html;
         });
     }
 
-    function carregarRaiz() {
-      fetch(`${URL}?id=1kLcbguxmPRYCF2OVWcqQpN8dUQhcJv3U`)
+    function carregarPastasPrincipais() {
+      fetch(URL)
         .then(res => res.json())
         .then(data => {
-          document.getElementById("carregando").style.display = "none";
-          const conteudo = document.getElementById("conteudo");
-          data.subpastas.forEach(pasta => {
-            conteudo.innerHTML += criarPastaHTML(pasta);
-          });
+          todasAsPastas = data.subpastas;
+          document.getElementById("conteudo").innerHTML = data.subpastas.map(criarCartaoPasta).join("");
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("conteudo").style.display = "grid";
         });
     }
 
     function pesquisarArquivos() {
       const termo = document.getElementById("pesquisa").value.toLowerCase();
-      const arquivos = document.querySelectorAll(".arquivo");
-      arquivos.forEach(arq => {
-        if (termo.length >= 3 && arq.dataset.nome.includes(termo)) {
-          arq.style.display = "block";
-        } else {
-          arq.style.display = "none";
-        }
-      });
+      if (termo.length < 3) return;
+
+      document.getElementById("conteudo").innerHTML = "<p>🔍 Buscando arquivos...</p>";
+
+      fetch(URL)
+        .then(res => res.json())
+        .then(data => {
+          const resultados = [];
+
+          function buscar(pasta) {
+            for (const arq of (pasta.arquivos || [])) {
+              if (arq.nome.toLowerCase().includes(termo)) {
+                resultados.push(`<li><a href="${arq.url}" target="_blank">📄 ${arq.nome}</a></li>`);
+              }
+            }
+            for (const sub of (pasta.subpastas || [])) {
+              buscar(sub);
+            }
+          }
+
+          buscar(data);
+
+          if (resultados.length === 0) {
+            document.getElementById("conteudo").innerHTML = "<p>🔍 Nenhum arquivo encontrado.</p>";
+          } else {
+            document.getElementById("conteudo").innerHTML = "<ul>" + resultados.join("") + "</ul>";
+          }
+        });
     }
 
-    window.onload = carregarRaiz;
+    window.onload = carregarPastasPrincipais;
   </script>
 </body>
 </html>
